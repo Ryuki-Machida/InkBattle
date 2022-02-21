@@ -2,18 +2,33 @@
 using System.Collections.Generic;
 using UnityEngine;
 
+/// <summary>
+/// 状態
+/// </summary>
+public enum Status
+{
+    Human,
+    Squid
+}
+
 public class PlayerController : MonoBehaviour
 {
     /// <summary>移動速度</summary>
     [SerializeField] float _movingSpeed = default;
     /// <summary>ターンの速さ</summary>
     [SerializeField] float _turnSpeed = default;
+    /// <summary>アタッチされてるコライダー</summary>
+    [SerializeField] Collider[] _colliders;
 
     Rigidbody _rb;
     Animator _anim;
 
+    Status _status;
+
     void Start()
     {
+        _colliders[0] = GetComponent<CapsuleCollider>();
+        _colliders[1] = GetComponent<BoxCollider>();
         _rb = GetComponent<Rigidbody>();
         _anim = GetComponent<Animator>();
     }
@@ -21,6 +36,7 @@ public class PlayerController : MonoBehaviour
     void Update()
     {
         PlayerMove();
+        CurrentState();
     }
 
     /// <summary>
@@ -48,6 +64,36 @@ public class PlayerController : MonoBehaviour
             Vector3 velo = dir.normalized * _movingSpeed; // 入力した方向に移動する
             velo.y = _rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
             _rb.velocity = velo;   // 計算した速度ベクトルをセットする
+        }
+
+        if (Input.GetButtonDown("Fire2"))
+        {
+            _status = Status.Squid;
+            _anim.SetBool("Squid", true);
+        }
+
+        if (Input.GetButtonUp("Fire2"))
+        {
+            _status = Status.Human;
+            _anim.SetBool("Squid", false);
+        }
+    }
+
+    /// <summary>
+    /// 今の状態に応じていろいろ変更する
+    /// </summary>
+    void CurrentState()
+    {
+        if (_status == Status.Human)
+        {
+            _colliders[0].enabled = true;
+            _colliders[1].enabled = false;
+        }
+
+        if (_status == Status.Squid)
+        {
+            _colliders[0].enabled = false;
+            _colliders[1].enabled = true;
         }
     }
 
