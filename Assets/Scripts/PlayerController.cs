@@ -17,8 +17,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _movingSpeed = default;
     /// <summary>ターンの速さ</summary>
     [SerializeField] float _turnSpeed = default;
+    /// <summary>ジャンプ力</summary>
+    [SerializeField] float _jumpPower = default;
     /// <summary>アタッチされてるコライダー</summary>
     [SerializeField] Collider[] _colliders;
+    /// <summary>地面にいるか</summary>
+    bool _isGround;
 
     Rigidbody _rb;
     Animator _anim;
@@ -77,6 +81,12 @@ public class PlayerController : MonoBehaviour
             _status = Status.Human;
             _anim.SetBool("Squid", false);
         }
+
+        if (Input.GetButtonDown("Jump") && _isGround)
+        {
+            _isGround = false;
+            _rb.AddForce(Vector3.up * _jumpPower, ForceMode.Impulse);
+        }
     }
 
     /// <summary>
@@ -106,5 +116,10 @@ public class PlayerController : MonoBehaviour
         Vector3 horizontalVelocity = _rb.velocity;
         horizontalVelocity.y = 0;
         _anim.SetFloat("Speed", horizontalVelocity.magnitude);
+    }
+
+    private void OnTriggerEnter(Collider other)
+    {
+        _isGround = true;
     }
 }
