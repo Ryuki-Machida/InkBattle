@@ -16,7 +16,7 @@ GameObject:
   - component: {fileID: 48142068167556070}
   m_Layer: 0
   m_Name: Bullet
-  m_TagString: Untagged
+  m_TagString: Bullet
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -109,7 +109,7 @@ Rigidbody:
   m_UseGravity: 1
   m_IsKinematic: 0
   m_Interpolate: 0
-  m_Constraints: 112
+  m_Constraints: 0
   m_CollisionDetection: 0
 --- !u!114 &48142068167556070
 MonoBehaviour:
@@ -123,6 +123,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3e98ae849a8ae6a45856b6af4097d53f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  _distanceToFly: 7
   _materialColor: {fileID: 2100000, guid: d9f0634866cba9c41a332cdf1d07c088, type: 2}
   _inkPrefab: {fileID: 6481324127090605490, guid: 7eb439b96bd4399449a78f191c7cf794,
     type: 3}

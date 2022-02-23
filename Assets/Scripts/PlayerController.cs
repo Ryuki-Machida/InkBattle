@@ -96,7 +96,7 @@ public class PlayerController : MonoBehaviour
 
             if (_time > _interval)
             {
-                Instantiate(_shellPrefab, _muzzle.position, this.transform.rotation);
+                Instantiate(_shellPrefab, _muzzle.position, _mainCamera.transform.rotation);
                 _time = 0;
             }
         }
