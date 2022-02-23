@@ -29,12 +29,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _interval = default;
     /// <summary>砲口を指定する</summary>
     [SerializeField] Transform _muzzle = default;
+    /// <summary>持っているシューター</summary>
+    [SerializeField] GameObject _shooter = default;
     /// <summary>地面にいるか</summary>
     bool _isGround;
     float _time;
 
     Rigidbody _rb;
     Animator _anim;
+    SkinnedMeshRenderer[] _skinnedMesh;
 
     Status _status;
 
@@ -44,6 +47,7 @@ public class PlayerController : MonoBehaviour
         _colliders[1] = GetComponent<BoxCollider>();
         _rb = GetComponent<Rigidbody>();
         _anim = GetComponent<Animator>();
+        _skinnedMesh = GetComponentsInChildren<SkinnedMeshRenderer>();
     }
 
     void Update()
@@ -89,7 +93,7 @@ public class PlayerController : MonoBehaviour
     {
         _time += Time.deltaTime;
 
-        if (Input.GetButton("Fire1"))
+        if (Input.GetButton("Fire1") && _status == Status.Human)
         {
             this.transform.rotation = Quaternion.Euler(0, _mainCamera.transform.rotation.eulerAngles.y, 0);
             _anim.SetBool("Attack", true);
@@ -109,12 +113,14 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Fire2"))
         {
             _status = Status.Squid;
+            _shooter.SetActive(false);
             _anim.SetBool("Squid", true);
         }
 
         if (Input.GetButtonUp("Fire2"))
         {
             _status = Status.Human;
+            _shooter.SetActive(true);
             _anim.SetBool("Squid", false);
         }
 
@@ -157,5 +163,37 @@ public class PlayerController : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         _isGround = true;
+
+        if (other.gameObject.CompareTag("Ink"))
+        {
+            //インクの中
+
+            if (_status == Status.Human)
+            {
+                for (int i = 0; i < _skinnedMesh.Length; i++)
+                {
+                    _skinnedMesh[i].enabled = true;
+                }
+            }
+
+            if (_status == Status.Squid)
+            {
+                for (int i = 0; i < _skinnedMesh.Length; i++)
+                {
+                    _skinnedMesh[i].enabled = false;
+                }
+            }
+        }
+    }
+
+    private void OnTriggerExit(Collider other)
+    {
+        if (other.gameObject.CompareTag("Ink"))
+        {
+            for (int i = 0; i < _skinnedMesh.Length; i++)
+            {
+                _skinnedMesh[i].enabled = true;
+            }
+        }
     }
 }
