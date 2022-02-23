@@ -13,6 +13,8 @@ public enum Status
 
 public class PlayerController : MonoBehaviour
 {
+    /// <summary>向く方向</summary>
+    [SerializeField] GameObject _mainCamera;
     /// <summary>移動速度</summary>
     [SerializeField] float _movingSpeed = default;
     /// <summary>ターンの速さ</summary>
@@ -21,8 +23,15 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _jumpPower = default;
     /// <summary>アタッチされてるコライダー</summary>
     [SerializeField] Collider[] _colliders;
+    /// <summary>砲弾として生成するプレハブ</summary>
+    [SerializeField] GameObject _shellPrefab = default;
+    /// <summary>発射間隔</summary>
+    [SerializeField] float _interval = default;
+    /// <summary>砲口を指定する</summary>
+    [SerializeField] Transform _muzzle = default;
     /// <summary>地面にいるか</summary>
     bool _isGround;
+    float _time;
 
     Rigidbody _rb;
     Animator _anim;
@@ -68,6 +77,33 @@ public class PlayerController : MonoBehaviour
             Vector3 velo = dir.normalized * _movingSpeed; // 入力した方向に移動する
             velo.y = _rb.velocity.y;   // ジャンプした時の y 軸方向の速度を保持する
             _rb.velocity = velo;   // 計算した速度ベクトルをセットする
+        }
+
+        PlayerAction();
+    }
+    
+    /// <summary>
+    /// 動作を増やす時はここに書く
+    /// </summary>
+    void PlayerAction()
+    {
+        _time += Time.deltaTime;
+
+        if (Input.GetButton("Fire1"))
+        {
+            this.transform.rotation = Quaternion.Euler(0, _mainCamera.transform.rotation.eulerAngles.y, 0);
+            _anim.SetBool("Attack", true);
+
+            if (_time > _interval)
+            {
+                Instantiate(_shellPrefab, _muzzle.position, this.transform.rotation);
+                _time = 0;
+            }
+        }
+
+        if (Input.GetButtonUp("Fire1"))
+        {
+            _anim.SetBool("Attack", false);
         }
 
         if (Input.GetButtonDown("Fire2"))
