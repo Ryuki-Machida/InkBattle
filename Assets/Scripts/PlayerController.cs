@@ -38,6 +38,8 @@ public class PlayerController : MonoBehaviour
     [SerializeField] GameObject _inkSlider = default;
     /// <summary>インクが無いことを知らせる</summary>
     [SerializeField] GameObject _noticePanel = default;
+    /// <summary>Rayを飛ばす距離</summary>
+    [SerializeField] float _maxRayDistance = 1f;
 
     /// <summary>地面にいるか</summary>
     bool _isGround;
@@ -50,6 +52,7 @@ public class PlayerController : MonoBehaviour
     Animator _anim;
     SkinnedMeshRenderer[] _skinnedMesh;
     Slider _slider;
+    RaycastHit _hit;
 
     Status _status;
 
@@ -146,14 +149,12 @@ public class PlayerController : MonoBehaviour
         if (Input.GetButtonDown("Fire2"))
         {
             _status = Status.Squid;
-            _shooter.SetActive(false);
             _anim.SetBool("Squid", true);
         }
 
         if (Input.GetButtonUp("Fire2"))
         {
             _status = Status.Human;
-            _shooter.SetActive(true);
             _anim.SetBool("Squid", false);
         }
 
@@ -173,12 +174,44 @@ public class PlayerController : MonoBehaviour
         {
             _colliders[0].enabled = true;
             _colliders[1].enabled = false;
+            _shooter.SetActive(true);
         }
 
         if (_status == Status.Squid)
         {
             _colliders[0].enabled = false;
             _colliders[1].enabled = true;
+            _shooter.SetActive(false);
+            Ray();
+        }
+    }
+
+    /// <summary>
+    /// 壁を登れるか判断する
+    /// </summary>
+    void Ray()
+    {
+        Physics.Raycast(this.transform.position, this.transform.forward, out _hit, _maxRayDistance);
+        Debug.DrawRay(this.transform.position, this.transform.forward * _hit.distance, Color.red);
+
+        //改良絶対必要
+        float hitx = _hit.transform.rotation.eulerAngles.x;
+        float hitz = _hit.transform.rotation.eulerAngles.z;
+        float x = _hit.transform.rotation.eulerAngles.x;
+        float z = _hit.transform.rotation.eulerAngles.z;
+
+        if (_hit.collider.CompareTag("Ink"))　//壁移動
+        {
+            float v = Input.GetAxisRaw("Vertical");
+            float h = Input.GetAxisRaw("Horizontal");
+
+            if (hitx > 0 || x > 0 || hitz > 0 || z > 0)
+            {
+                this.transform.rotation = Quaternion.FromToRotation(Vector3.up, _hit.normal);
+                this.transform.position += this.transform.localScale.y / 1.98f * _hit.normal;
+                Vector3 dir = new Vector3(h, v, 0).normalized;
+                _rb.velocity = dir * _movingSpeed;
+            }
         }
     }
 
