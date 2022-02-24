@@ -36,10 +36,12 @@ public class PlayerController : MonoBehaviour
     [SerializeField] float _attackTime = default;
     /// <summary>インク量</summary>
     [SerializeField] GameObject _inkSlider = default;
+    /// <summary>インクが無いことを知らせる</summary>
+    [SerializeField] GameObject _noticePanel = default;
 
     /// <summary>地面にいるか</summary>
     bool _isGround;
-    /// <summary>地面にいるか</summary>
+    /// <summary>発射時間</summary>
     float _time;
     /// <summary>インクの回復スピード</summary>
     float _inkHealSpeed = 0.5f;
@@ -124,6 +126,7 @@ public class PlayerController : MonoBehaviour
             else
             {
                 _attackTime = 0;　//0より下げないように
+                _noticePanel.SetActive(true);
             }
         }
         else
@@ -131,6 +134,7 @@ public class PlayerController : MonoBehaviour
             if (_attackTime <= 11)　//11sより上げないように
             {
                 _attackTime += Time.deltaTime * _inkHealSpeed;　//インク回復
+                _noticePanel.SetActive(false);
             }
         }
 
