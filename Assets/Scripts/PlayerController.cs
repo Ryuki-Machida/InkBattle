@@ -1,6 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// 状態
@@ -31,13 +32,22 @@ public class PlayerController : MonoBehaviour
     [SerializeField] Transform _muzzle = default;
     /// <summary>持っているシューター</summary>
     [SerializeField] GameObject _shooter = default;
+    /// <summary>攻撃し続ける時間</summary>
+    [SerializeField] float _attackTime = default;
+    /// <summary>インク量</summary>
+    [SerializeField] GameObject _inkSlider = default;
+
     /// <summary>地面にいるか</summary>
     bool _isGround;
+    /// <summary>地面にいるか</summary>
     float _time;
+    /// <summary>インクの回復スピード</summary>
+    float _inkHealSpeed = 0.5f;
 
     Rigidbody _rb;
     Animator _anim;
     SkinnedMeshRenderer[] _skinnedMesh;
+    Slider _slider;
 
     Status _status;
 
@@ -48,6 +58,7 @@ public class PlayerController : MonoBehaviour
         _rb = GetComponent<Rigidbody>();
         _anim = GetComponent<Animator>();
         _skinnedMesh = GetComponentsInChildren<SkinnedMeshRenderer>();
+        _slider = _inkSlider.GetComponent<Slider>();
     }
 
     void Update()
@@ -91,17 +102,35 @@ public class PlayerController : MonoBehaviour
     /// </summary>
     void PlayerAction()
     {
+        _slider.value = _attackTime;
+
         _time += Time.deltaTime;
 
         if (Input.GetButton("Fire1") && _status == Status.Human)
         {
+            _attackTime -= Time.deltaTime;
+
             this.transform.rotation = Quaternion.Euler(0, _mainCamera.transform.rotation.eulerAngles.y, 0);
             _anim.SetBool("Attack", true);
 
-            if (_time > _interval)
+            if (_attackTime > 0)
             {
-                Instantiate(_shellPrefab, _muzzle.position, _mainCamera.transform.rotation);
-                _time = 0;
+                if (_time > _interval)
+                {
+                    Instantiate(_shellPrefab, _muzzle.position, _mainCamera.transform.rotation);
+                    _time = 0;
+                }
+            }
+            else
+            {
+                _attackTime = 0;　//0より下げないように
+            }
+        }
+        else
+        {
+            if (_attackTime <= 11)　//11sより上げないように
+            {
+                _attackTime += Time.deltaTime * _inkHealSpeed;　//インク回復
             }
         }
 
@@ -182,6 +211,7 @@ public class PlayerController : MonoBehaviour
                 {
                     _skinnedMesh[i].enabled = false;
                 }
+                _inkHealSpeed = 2.5f;
             }
         }
     }
@@ -194,6 +224,8 @@ public class PlayerController : MonoBehaviour
             {
                 _skinnedMesh[i].enabled = true;
             }
+
+            _inkHealSpeed = 0.5f;
         }
     }
 }
